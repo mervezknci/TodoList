@@ -140,7 +140,7 @@
 				success: function (data) {
 					if (data.IsSuccess == true) {
 						$('#myModal').modal('show');
-
+						$('#myModal table').find('table tbody').html('');
 						$('#myModal table').append(modalReturnTable(data.Data));
 					}
 					else {
@@ -158,7 +158,6 @@
 				$('#desc').removeAttr('hidden');
 				$('#date').removeAttr('hidden');
 				$('.table-save').removeAttr('hidden');
-
 			});
 
 
@@ -221,12 +220,12 @@
 
 			//update button
 			$('.table-update').on('click', function () {
-
+				debugger;
 				var $datas = $(this).find('button');
 				queryData = {
 					Id: $datas.data('id'),
-					Description: $('#description').text(),
-					CreatedDate: $("#createdDate").text().trim()
+					Description: $(this).parents('tr').find('td#description').text(),
+					CreatedDate: $(this).parents('tr').find('td#createdDate').text().trim()
 				}
 				AddOrSet();
 			});
