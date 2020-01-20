@@ -1,0 +1,18 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width" />
+	<title>@ViewBag.Title</title>
+	@*<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">*@
+	<link href="~/Content/css/bootstrap.min.css" rel="stylesheet" />
+	@RenderSection("head", false)
+</head>
+<body>
+	@RenderBody()
+	<script src="~/Content/js/jquery-3.4.0.min.js"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+	@RenderSection("scripts", false)
+</body>
+</html>

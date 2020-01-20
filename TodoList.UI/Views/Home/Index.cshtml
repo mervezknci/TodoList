@@ -1,0 +1,255 @@
+﻿@model IEnumerable<TodoList.UI.Models.TodoModel>
+@section head{
+	<link href="~/Content/css/site.css" rel="stylesheet" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+
+	<style>
+		body {
+			background-color: lightgray;
+		}
+
+		.pt-3-half {
+			padding-top: 1.4rem;
+		}
+
+		.date {
+			margin-right: 30px;
+		}
+
+		.form-control {
+			margin: 10px;
+		}
+
+		.table-save {
+			float: right;
+		}
+	</style>
+}
+<!-- Editable table -->
+<div class="card">
+	<h3 class="card-header text-center font-weight-bold text-uppercase py-4">Yapılacaklar Listesi</h3>
+	<div class="card-body">
+		<div id="table" class="table-editable">
+
+			<span class="table-add float-right mb-3 mr-2">
+				<a href="#" class="text-success" id="addTodo">
+					<i class="fa fa-plus fa-2x" aria-hidden="true"></i>
+				</a>
+			</span>
+
+			<input type="text" hidden class="form-control" id="desc" placeholder="Açıklama Giriniz" />
+			<input type="datetime-local" hidden class="form-control" id="date" placeholder="..." />
+
+			<span class="table-save" hidden>
+				<button type="button"
+						class="btn btn-success btn-rounded btn-sm my-0" id="saveTodo">
+					Kaydet
+				</button>
+			</span>
+
+			<table class="table table-bordered table-responsive-md table-striped text-center">
+				<thead>
+					<tr>
+						<th class="text-center">İşlem</th>
+						<th class="text-center">Açıklama</th>
+						<th class="text-center">Tarih</th>
+					</tr>
+				</thead>
+				<tbody class="todoList">
+					@{
+						foreach (var item in Model)
+						{
+							<tr>
+								<td>
+									<span class="table-remove">
+
+										<button type="button"
+												class="btn btn-danger btn-rounded btn-sm my-0" data-id="@item.Id" data-date="@item.CreatedDate.ToString("yyyy-MM-ddThh:mm")">
+											<i class="fa fa-remove"></i>
+										</button>
+
+
+									</span>
+									<span class="table-update">
+
+										<button type="button"
+												class="btn btn-success btn-rounded btn-sm my-0" data-id="@item.Id" data-date="@item.CreatedDate.ToString("yyyy-MM-ddThh:mm")">
+											<i class="fa fa-edit"></i>
+										</button>
+
+									</span>
+								</td>
+								<td class="pt-3-half" id="description" contenteditable="true">@item.Description</td>
+								
+								<td class="pt-3-half" id="createdDate" contenteditable="true">
+									@item.CreatedDate
+								</td>
+							</tr>
+						}
+					}
+				</tbody>
+
+			</table>
+		</div>
+	</div>
+</div>
+<div id="myModal" class="modal fade" role="dialog">
+	<div class="modal-dialog">
+
+		<!-- Modal content-->
+		<div class="modal-content">
+			<div class="modal-header">
+				Bugün Yapılacaklar
+			</div>
+			<div class="modal-body">
+				<table class="table">
+					<thead>
+						<tr>
+							<th>Açıklama</th>
+							<th>Tarih</th>
+						</tr>
+					</thead>
+				</table>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+
+	</div>
+</div>
+
+<!-- Editable table -->
+@section scripts{
+	<script type="text/javascript">
+
+		var _URLRemoveTodo = '/Home/RemoveTodo/';
+		var _URLAddorSetTodo = '/Home/AddorSetTodo/';
+		var _URLOutDatedTodo = '/Home/OutDatedTodo/';
+
+		$(document).ready(function () {
+
+			$.ajax({
+				url: _URLOutDatedTodo,
+				type: 'POST',
+				contentType: 'application/json',
+				beforeSend: function (xhr) {
+					//Loading()
+				},
+				success: function (data) {
+					if (data.IsSuccess == true) {
+						$('#myModal').modal('show');
+
+						$('#myModal table').append(modalReturnTable(data.Data));
+					}
+					else {
+						alert("Hata");
+					}
+				},
+				error: function (data) {
+					alert("Hata");
+				},
+				complete: function () {
+				}
+			});
+
+			$('#addTodo').on('click', function () {
+				$('#desc').removeAttr('hidden');
+				$('#date').removeAttr('hidden');
+				$('.table-save').removeAttr('hidden');
+
+			});
+
+
+			var queryData;
+			function AddOrSet() {
+				$.ajax({
+					url: _URLAddorSetTodo,
+					type: 'POST',
+					contentType: 'application/json',
+					data: JSON.stringify(queryData),
+					beforeSend: function (xhr) {
+						//Loading()
+					},
+					success: function (data) {
+						alert("Liste güncellendi.");
+						window.location.reload();
+						//redirect
+					},
+					error: function (data) {
+						alert("hata");
+					},
+					complete: function () {
+						Loading(false);
+					}
+				});
+			}
+
+			//remove button
+			$('.table-remove').on('click', function () {
+				var $data = $(this).find('button');
+
+				$.ajax({
+					url: _URLRemoveTodo + $data.data('id'),
+					type: 'POST',
+					contentType: 'application/json',
+					beforeSend: function (xhr) {
+						//Loading()
+					},
+					success: function (data) {
+						debugger;
+						if (data.IsSuccess == true) {
+							$data.remove();
+							alert("Silindi.");
+							window.location.reload();
+						}
+						else {
+							alert("Hata");
+						}
+					},
+					error: function (data) {
+						alert("Hata");
+					},
+					complete: function () {
+						Loading(false);
+					}
+				});
+
+			});
+
+
+			//update button
+			$('.table-update').on('click', function () {
+
+				var $datas = $(this).find('button');
+				queryData = {
+					Id: $datas.data('id'),
+					Description: $('#description').text(),
+					CreatedDate: $("#createdDate").text().trim()
+				}
+				AddOrSet();
+			});
+
+			//save button
+			$('.table-save').on('click', function () {
+				queryData = {
+					Description: $('#desc').val(),
+					CreatedDate: $("#date").val().trim()
+				}
+				AddOrSet();
+			});
+		});
+
+		function modalReturnTable(models) {
+			return $.map(models,
+				function (o, i) {
+					return "<tr>" +
+						"<td>" + o.Description + "</td>" +
+						"<td>" + moment(o.CreatedDate).format('YYYY-MM-DD hh:mm') + "</td>" +
+						"</tr>";
+				}).join();
+		}
+
+	</script>
+}
